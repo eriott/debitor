@@ -14,16 +14,9 @@ Web server для управления балансом пользователе
 ## Запуск
 
 ```bash
-# Установка зависимостей
-npm install
-
-# Настройка окружения
+npm ci
 cp .env.example .env
-
-# Создание начального пользователя
-npm run seed
-
-# Запуск в dev режиме
+npm run seed # Создание начального пользователя
 npm run start:dev
 ```
 
@@ -33,6 +26,5 @@ npm run start:dev
 
 ```bash
 cp .env.example .env.test 
-
 npm run test:e2e
 ```
