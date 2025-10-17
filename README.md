@@ -1,30 +1,38 @@
-## Description
+# Balance Transaction Service
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+Web server для управления балансом пользователей с поддержкой атомарных транзакций.
 
-## Project setup
+## Реализовано
 
-```bash
-$ npm install
-```
+- Списание баланса пользователя через `POST /users/:userId/transactions`
+- Таблицы: `users` (id, balance), `transaction_history` (user_id, action, amount, ts)
+- Идемпотентность через `Idempotency-Key` header
+- Обработка race conditions (SERIALIZABLE isolation + retry logic)
+- Валидация запросов (class-validator)
+- E2E тесты
 
-## Compile and run the project
-
-```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
-```
-
-## Run tests
+## Запуск
 
 ```bash
-# e2e tests
-$ npm run test:e2e
+# Установка зависимостей
+npm install
+
+# Настройка окружения
+cp .env.example .env
+
+# Создание начального пользователя
+npm run seed
+
+# Запуск в dev режиме
+npm run start:dev
 ```
 
+## Тесты
+ 
+Нужно изменить файл `.env.test`, указав там тестовую базу (переменная DB_DATABASE)
+
+```bash
+cp .env.example .env.test 
+
+npm run test:e2e
+```
