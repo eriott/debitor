@@ -12,8 +12,7 @@ export class TransactionsService {
   private readonly RETRY_DELAY_MS = 50;
 
   constructor (
-    @InjectRepository(TransactionHistory)
-    private transactionHistoryRepository: Repository<TransactionHistory>,
+    @InjectRepository(TransactionHistory) private transactionHistoryRepository: Repository<TransactionHistory>,
     @InjectRepository(User) private userRepository: Repository<User>,
     private dataSource: DataSource
   ) {
@@ -68,6 +67,12 @@ export class TransactionsService {
     );
   }
 
+  private isIdempotencyError (error: any): boolean {
+    return error.code === '23505' &&
+      (error.constraint?.includes('idempotency') ||
+        error.detail?.includes('idempotency_key'))
+  }
+
   private async processTransaction (
     userId: number,
     dto: CreateTransactionDto,
@@ -110,11 +115,7 @@ export class TransactionsService {
       if (error instanceof QueryFailedError) {
         const pgError = error as any;
 
-        if (
-          pgError.code === '23505' &&
-          (pgError.constraint?.includes('idempotency') ||
-            pgError.detail?.includes('idempotency_key'))
-        ) {
+        if (this.isIdempotencyError(pgError)) {
           this.logger.log(`Duplicate idempotency key ${idempotencyKey}, returning existing transaction`);
 
           const existing = await this.transactionHistoryRepository.findOne({ where: { idempotencyKey } });
